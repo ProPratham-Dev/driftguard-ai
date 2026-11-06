@@ -277,3 +277,15 @@ def test_fastapi_endpoints():
         assert res_rb.status_code == 200
         rb_data = res_rb.json()
         assert "success" in rb_data
+
+        # 8. GET /api/drift/history
+        res_hist = client.get("/api/drift/history?limit=10&window_size=5")
+        assert res_hist.status_code == 200
+        hist_data = res_hist.json()
+        assert isinstance(hist_data, list)
+        if len(hist_data) > 0:
+            first_pt = hist_data[0]
+            assert "tx_id" in first_pt
+            assert "adaptive_rolling_error" in first_pt
+            assert "fixed_rolling_error" in first_pt
+            assert "reference_error_rate" in first_pt

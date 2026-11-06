@@ -19,6 +19,7 @@ function DashboardContent() {
     transactions,
     driftStatus,
     driftEvents,
+    driftHistory,
     simulatorStatus,
     modelVersions,
     comparisonMetrics,
@@ -73,6 +74,7 @@ function DashboardContent() {
             <DriftMonitor
               driftStatus={driftStatus}
               driftEvents={driftEvents}
+              driftHistory={driftHistory}
             />
           </div>
 

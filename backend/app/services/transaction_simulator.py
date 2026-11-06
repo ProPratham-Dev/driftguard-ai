@@ -232,10 +232,20 @@ class TransactionSimulator:
                         )
                         self.feedback_processed += 1
 
+                        mature_tx = db.query(DBTransaction).filter(DBTransaction.tx_id == mature_tx_id).first()
+                        fixed_pred = mature_tx.fixed_prediction if mature_tx else 0
+                        adaptive_err = 0 if fb_res["prediction"] == mature_label else 1
+                        fixed_err = 0 if fixed_pred == mature_label else 1
+
                         # Broadcast verified feedback event (ground truth now revealed!)
                         await ws_manager.broadcast("verified_feedback", {
                             "tx_id": mature_tx_id,
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
                             "ground_truth": mature_label,
+                            "adaptive_prediction": fb_res["prediction"],
+                            "fixed_prediction": fixed_pred,
+                            "adaptive_error": adaptive_err,
+                            "fixed_error": fixed_err,
                             "prediction": fb_res["prediction"],
                             "prediction_correct": fb_res["prediction_correct"],
                             "drift_status": fb_res["drift_status"],

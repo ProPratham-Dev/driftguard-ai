@@ -7,6 +7,7 @@ from backend.app.core.config import settings
 from backend.app.models.schemas import (
     SystemStatusResponse,
     DriftStatusResponse,
+    DriftHistoryPoint,
     DriftEventResponse,
     ModelVersionResponse,
     FeedbackSubmit,
@@ -114,6 +115,65 @@ def get_drift_events(
         .all()
     )
     return events
+
+@router.get("/drift/history", response_model=List[DriftHistoryPoint], tags=["Concept Drift"])
+def get_drift_history(
+    limit: int = Query(50, ge=5, le=300),
+    window_size: int = Query(15, ge=3, le=50),
+    db: Session = Depends(get_db)
+):
+    """
+    Fetch chronological time-series of verified feedback transactions with rolling prediction error rates
+    for both the online adaptive model and the fixed model over identical verified transactions.
+    """
+    txs = (
+        db.query(DBTransaction)
+        .filter(DBTransaction.feedback_received == True)
+        .order_by(DBTransaction.id.desc())
+        .limit(limit)
+        .all()
+    )
+
+    if not txs:
+        return []
+
+    # Reverse to chronological order
+    txs = list(reversed(txs))
+
+    ref_info = adaptive_service.drift_detector.check_drift()
+    ref_rate = ref_info.get("reference_error_rate", 0.0)
+
+    history = []
+    for i, tx in enumerate(txs):
+        fb_ts = tx.feedback_timestamp or tx.timestamp or datetime.now(timezone.utc)
+        gt = tx.feedback_label if tx.feedback_label is not None else 0
+        adapt_pred = tx.adaptive_prediction if tx.adaptive_prediction is not None else 0
+        fixed_pred = tx.fixed_prediction if tx.fixed_prediction is not None else 0
+
+        adapt_err = 1 if adapt_pred != gt else 0
+        fixed_err = 1 if fixed_pred != gt else 0
+
+        window_slice = txs[max(0, i - window_size + 1) : i + 1]
+        n_slice = len(window_slice)
+        adapt_rolling = sum(1 for t in window_slice if (t.adaptive_prediction if t.adaptive_prediction is not None else 0) != (t.feedback_label if t.feedback_label is not None else 0)) / n_slice
+        fixed_rolling = sum(1 for t in window_slice if (t.fixed_prediction if t.fixed_prediction is not None else 0) != (t.feedback_label if t.feedback_label is not None else 0)) / n_slice
+
+        history.append(
+            DriftHistoryPoint(
+                tx_id=tx.tx_id,
+                timestamp=fb_ts,
+                ground_truth=gt,
+                adaptive_prediction=adapt_pred,
+                fixed_prediction=fixed_pred,
+                adaptive_error=adapt_err,
+                fixed_error=fixed_err,
+                adaptive_rolling_error=round(adapt_rolling, 4),
+                fixed_rolling_error=round(fixed_rolling, 4),
+                reference_error_rate=round(ref_rate, 4)
+            )
+        )
+
+    return history
 
 # --- Model Versions & History Endpoints ---
 

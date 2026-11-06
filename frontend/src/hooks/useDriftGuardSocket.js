@@ -13,6 +13,7 @@ export function useDriftGuardSocket() {
     status_message: 'Monitoring transaction stream...'
   });
   const [driftEvents, setDriftEvents] = useState([]);
+  const [driftHistory, setDriftHistory] = useState([]);
   const [simulatorStatus, setSimulatorStatus] = useState({
     is_running: false,
     is_paused: false,
@@ -50,12 +51,13 @@ export function useDriftGuardSocket() {
   // Initial REST Sync
   const fetchInitialData = useCallback(async () => {
     try {
-      const [simRes, driftRes, versionsRes, compRes, eventsRes] = await Promise.all([
+      const [simRes, driftRes, versionsRes, compRes, eventsRes, historyRes] = await Promise.all([
         fetch('/api/simulator/status').then((r) => (r.ok ? r.json() : null)),
         fetch('/api/drift/status').then((r) => (r.ok ? r.json() : null)),
         fetch('/api/models/versions').then((r) => (r.ok ? r.json() : [])),
         fetch('/api/metrics/comparison?window=200').then((r) => (r.ok ? r.json() : null)),
-        fetch('/api/drift/events?limit=20').then((r) => (r.ok ? r.json() : []))
+        fetch('/api/drift/events?limit=20').then((r) => (r.ok ? r.json() : [])),
+        fetch('/api/drift/history?limit=50&window_size=15').then((r) => (r.ok ? r.json() : []))
       ]);
 
       if (simRes) setSimulatorStatus(simRes);
@@ -63,6 +65,7 @@ export function useDriftGuardSocket() {
       if (versionsRes) setModelVersions(versionsRes);
       if (compRes) setComparisonMetrics(compRes);
       if (eventsRes) setDriftEvents(eventsRes);
+      if (historyRes) setDriftHistory(historyRes);
     } catch (err) {
       console.warn('Initial REST sync error:', err);
     }
@@ -121,6 +124,28 @@ export function useDriftGuardSocket() {
             if (data.drift_status) {
               setDriftStatus(data.drift_status);
             }
+            // Real-time update to rolling error series
+            setDriftHistory((prev) => {
+              const windowSize = 15;
+              const newPoint = {
+                tx_id: data.tx_id,
+                timestamp: data.timestamp || new Date().toISOString(),
+                ground_truth: data.ground_truth,
+                adaptive_prediction: data.adaptive_prediction ?? data.prediction,
+                fixed_prediction: data.fixed_prediction ?? 0,
+                adaptive_error: data.adaptive_error ?? (data.prediction_correct ? 0 : 1),
+                fixed_error: data.fixed_error ?? 0,
+                reference_error_rate: data.drift_status?.reference_error_rate ?? 0.0
+              };
+              const combined = [...prev, newPoint].slice(-50);
+              const recentSlice = combined.slice(-windowSize);
+              const nSlice = recentSlice.length;
+              const adaptErrRate = recentSlice.reduce((acc, p) => acc + p.adaptive_error, 0) / nSlice;
+              const fixedErrRate = recentSlice.reduce((acc, p) => acc + p.fixed_error, 0) / nSlice;
+              combined[combined.length - 1].adaptive_rolling_error = adaptErrRate;
+              combined[combined.length - 1].fixed_rolling_error = fixedErrRate;
+              return combined;
+            });
             setSimulatorStatus((prev) => ({
               ...prev,
               feedback_processed: prev.feedback_processed + 1
@@ -227,6 +252,7 @@ export function useDriftGuardSocket() {
     transactions,
     driftStatus,
     driftEvents,
+    driftHistory,
     simulatorStatus,
     modelVersions,
     comparisonMetrics,

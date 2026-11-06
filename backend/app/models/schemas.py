@@ -121,6 +121,20 @@ class DriftStatusResponse(BaseModel):
     detection_timestamp: datetime
     status_message: str
 
+class DriftHistoryPoint(BaseModel):
+    tx_id: str
+    timestamp: datetime
+    ground_truth: int
+    adaptive_prediction: int
+    fixed_prediction: int
+    adaptive_error: int
+    fixed_error: int
+    adaptive_rolling_error: float
+    fixed_rolling_error: float
+    reference_error_rate: float
+
+    model_config = ConfigDict(from_attributes=True)
+
 class FeedbackResponse(BaseModel):
     tx_id: str
     feedback_recorded: bool
