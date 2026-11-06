@@ -68,3 +68,4 @@ All metrics are measured on identical chronological test records:
 - **No Ground-Truth Exposure**: Labels are never provided to models at prediction time. Online updates occur strictly after verified feedback arrives.
 - **Strict Separation**: Fixed and Adaptive models maintain independent weights and memory spaces.
 - **Rollback Resilience**: Adaptive model maintains version checkpoints enabling immediate rollbacks if candidate performance degrades.
+

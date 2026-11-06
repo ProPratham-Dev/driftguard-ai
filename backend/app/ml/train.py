@@ -124,11 +124,12 @@ def run_training_pipeline():
         version_tag="v1.x-streaming-adapted"
     )
 
-    # Re-evaluate the final adapted model on the holdout of the drift stream to measure post-adaptation steady state
+    # Evaluate steady state on the tail 1,000 transactions using strictly prequential predictions
+    # (predictions recorded BEFORE each batch was provided as feedback)
     test_tail_X = X_drift[-1000:]
     test_tail_y = y_drift[-1000:]
     fixed_tail_pred = fixed_model.predict(test_tail_X)
-    adaptive_tail_pred = adaptive_model.predict(test_tail_X)
+    adaptive_tail_pred = adaptive_stream_preds[-1000:]
 
     tail_comparison = compare_models(
         test_tail_y,
@@ -223,3 +224,4 @@ def run_training_pipeline():
 
 if __name__ == "__main__":
     run_training_pipeline()
+

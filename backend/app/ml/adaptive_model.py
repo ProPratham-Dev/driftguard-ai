@@ -164,3 +164,4 @@ class AdaptiveFraudModel:
         instance.classes_ = instance.model.classes_
         instance.history = data.get("history", [])
         return instance
+

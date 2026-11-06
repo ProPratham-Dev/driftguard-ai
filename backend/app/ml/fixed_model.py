@@ -73,3 +73,4 @@ class FixedFraudModel:
         instance.is_trained = data["is_trained"]
         instance.classes_ = instance.model.classes_
         return instance
+

@@ -115,3 +115,4 @@ class FraudFeaturePipeline:
         if not isinstance(obj, cls):
             raise TypeError(f"Loaded object is not an instance of {cls.__name__}")
         return obj
+

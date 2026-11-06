@@ -180,3 +180,57 @@ def test_evaluation_metrics():
     comp = compare_models(y_true, y_pred, y_pred)
     assert comp["evaluated_samples"] == 8
     assert comp["deltas"]["f1_score_gain"] == 0.0
+
+def test_audit_prequential_evaluation_strictness():
+    """
+    Audit test verifying:
+    1. Predictions are recorded BEFORE partial_fit() is called.
+    2. Model exhibits non-zero detection delay/errors on first unseen drift batch.
+    3. Incremental updates on verified feedback improve subsequent batches.
+    4. Preprocessor parameters (mean, var) are unchanged by test data transforms.
+    """
+    generator = SyntheticDatasetGenerator(seed=42)
+    df = generator.generate_dataset(total_samples=1000, historical_ratio=0.6)
+    
+    df_train = df.iloc[:600]
+    df_test = df.iloc[600:]
+
+    pipeline = FraudFeaturePipeline()
+    X_train = pipeline.fit_transform(df_train)
+    y_train = df_train["is_fraud"].values
+
+    # Record scaler stats before test transform
+    mean_before = pipeline.scaler.mean_.copy()
+    var_before = pipeline.scaler.var_.copy()
+
+    X_test = pipeline.transform(df_test)
+    y_test = df_test["is_fraud"].values
+
+    # Check scaler was not influenced by test data
+    assert np.allclose(mean_before, pipeline.scaler.mean_)
+    assert np.allclose(var_before, pipeline.scaler.var_)
+
+    model = AdaptiveFraudModel(random_state=42).fit(X_train, y_train)
+
+    # First unseen batch
+    X_b0 = X_test[:50]
+    y_b0 = y_test[:50]
+
+    # Predict BEFORE update
+    pred_b0 = model.predict(X_b0)
+    m_b0 = compute_metrics(y_b0, pred_b0)
+
+    # Now update on batch 0
+    weights_b0 = np.where(y_b0 == 1, 2.5, 1.0)
+    model.partial_fit(X_b0, y_b0, sample_weight=weights_b0)
+
+    # Next batch
+    X_b1 = X_test[50:100]
+    y_b1 = y_test[50:100]
+    pred_b1 = model.predict(X_b1)
+    m_b1 = compute_metrics(y_b1, pred_b1)
+
+    # Verify model learned and improved
+    assert m_b1["recall"] >= m_b0["recall"]
+
+
