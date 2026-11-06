@@ -1,0 +1,26 @@
+# Environments & Dependencies
+.venv/
+venv/
+node_modules/
+dist/
+build/
+
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Databases & local state
+*.db
+*.sqlite3
+driftguard.db
+
+# Logs & temp
+*.log
+.env
+!.env.example
+
+# IDE
+.vscode/
+.idea/
