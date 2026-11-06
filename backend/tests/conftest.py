@@ -16,3 +16,4 @@ def clean_database():
         db.close()
     yield
     # Keep schema ready for next test
+

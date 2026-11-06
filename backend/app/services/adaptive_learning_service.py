@@ -449,3 +449,4 @@ class AdaptiveLearningService:
 
 # Global service instance
 adaptive_service = AdaptiveLearningService()
+

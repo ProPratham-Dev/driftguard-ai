@@ -100,17 +100,89 @@ DriftGuard AI implements the **Adaptive Sliding-Window Statistical Drift Detecto
 
 ---
 
-## 🌐 API Endpoints (Phases 1–3)
+## 🌐 API & WebSocket Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/health` | Health check verifying core services. |
-| `GET` | `/api/status` | System KPIs, transaction counts, active model versions. |
-| `POST` | `/api/transactions/predict` | Predict incoming transaction features and record predictions. |
-| `GET` | `/api/drift/status` | Current drift detector status, error rates, and severity. |
-| `GET` | `/api/drift/events` | Chronological log of detected drift events. |
-| `GET` | `/api/models/versions` | Audited model version history and benchmark metrics. |
-| `POST` | `/api/learning/feedback` | Ingest verified ground truth for a transaction; triggers drift and candidate training. |
-| `POST` | `/api/learning/rollback` | Revert adaptive model to previous stable version. |
+| Protocol | Method | Endpoint | Description |
+|---|---|---|---|
+| HTTP | `GET` | `/api/health` | Health check verifying core services. |
+| HTTP | `GET` | `/api/status` | System KPIs, transaction counts, active model versions. |
+| HTTP | `POST` | `/api/transactions/predict` | Predict incoming transaction features and record predictions. |
+| HTTP | `GET` | `/api/drift/status` | Current drift detector status, error rates, and severity. |
+| HTTP | `GET` | `/api/drift/events` | Chronological log of detected drift events. |
+| HTTP | `GET` | `/api/models/versions` | Audited model version history and benchmark metrics. |
+| HTTP | `POST` | `/api/learning/feedback` | Ingest verified ground truth for a transaction; triggers drift and candidate training. |
+| HTTP | `POST` | `/api/learning/rollback` | Revert adaptive model to previous stable version. |
+| HTTP | `POST` | `/api/simulator/start` | Start asynchronous background transaction generator. |
+| HTTP | `POST` | `/api/simulator/pause` | Pause transaction stream. |
+| HTTP | `POST` | `/api/simulator/resume` | Resume paused transaction stream. |
+| HTTP | `POST` | `/api/simulator/stop` | Stop simulator and clear pending workers. |
+| HTTP | `GET` | `/api/simulator/status` | Live counters, regime, and speed configuration. |
+| HTTP | `POST` | `/api/simulator/config` | Update rate (ms), delay (ms), regime, and adaptive toggle. |
+| HTTP | `GET` | `/api/metrics/comparison` | Live side-by-side evaluation metrics on recent window. |
+| **WS** | `CONNECT`| `/ws/live` | Real-time bi-directional telemetry broadcast. |
+
+---
+
+## 📡 WebSocket Event Specification (`/ws/live`)
+
+All WebSocket events use a structured JSON envelope:
+```json
+{
+  "event": "<event_type>",
+  "timestamp": "2026-11-06T12:00:00Z",
+  "data": { ... }
+}
+```
+
+### Event Types:
+1. `connection_established`: Initial handshake returning active simulator and drift state.
+2. `new_transaction`: Emits newly arrived transaction with predictions (`fixed_prediction`, `adaptive_prediction`, scores). **Ground-truth is strictly hidden**.
+3. `verified_feedback`: Emitted after configured delay. Reveals ground-truth, prediction accuracy, and updated error rates.
+4. `drift_alert`: Fired when ASW-DD triggers `WARNING` or `CRITICAL` severity.
+5. `model_update`: Fired when candidate validation promotes a new version or rolls back.
+6. `simulator_status`: Broadcast whenever simulation state or parameters change.
+
+---
+
+## 🎮 Special Hackathon Demonstration Walkthrough
+
+Follow these three interactive steps on the dashboard to demonstrate how DriftGuard AI solves **The Moving Target**:
+
+1. **Step 1: Start Normal Traffic**
+   - Click **`1. Start Normal Traffic`**.
+   - Watch normal transaction volume flow through the system.
+   - Observe both Fixed and Adaptive models catching benign transactions with near-zero error.
+2. **Step 2: Introduce New Fraud Pattern**
+   - Click **`2. Introduce New Fraud Pattern`**.
+   - The simulator switches to nocturnal micro-velocity card testing ($14–$48 amounts, domestic IP, velocity 6–15/hr).
+   - **Observe Fixed Model Failure**: Fixed model predicts `LEGIT` (False Negatives surge to ~58%).
+   - **Observe Drift Detector**: ASW-DD error rate spikes, triggering a **CRITICAL CONCEPT DRIFT** alert.
+3. **Step 3: Enable Adaptive Learning**
+   - With **`3. Adaptive Learning`** enabled, verified feedback triggers candidate validation.
+   - The candidate model passes holdout validation and is promoted to active (`v1.x-adaptive-promoted`).
+   - The adaptive model immediately recovers **>99% fraud capture**, while the fixed model remains decayed.
+4. **Step 4: Zero-Downtime Rollback**
+   - Click **`Rollback Adaptive Version`** in the governance panel to instantly restore the previous version.
+
+---
+
+## 🖥️ Running the Complete Application Locally
+
+### 1. Start the Backend API & WebSocket Server
+```bash
+# Terminal 1 (from project root with virtual environment activated)
+.venv\Scripts\Activate.ps1
+uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+API docs available at: `http://localhost:8000/docs`
+
+### 2. Start the React Frontend Dashboard
+```bash
+# Terminal 2 (from project root)
+cd frontend
+npm run dev
+```
+Open your browser to: `http://localhost:5173`
+
 
 

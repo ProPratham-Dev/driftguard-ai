@@ -136,6 +136,29 @@ class RollbackResponse(BaseModel):
     active_version: str
     previous_version: Optional[str] = None
 
+class SimulatorConfigUpdate(BaseModel):
+    interval_ms: Optional[int] = Field(None, ge=50, le=10000, description="Interval between transactions in ms")
+    feedback_delay_ms: Optional[int] = Field(None, ge=200, le=30000, description="Delay before feedback arrives in ms")
+    fraud_regime: Optional[str] = Field(None, description="'normal', 'historical', or 'drift_evasion'")
+    adaptive_learning_enabled: Optional[bool] = None
+
+class SimulatorStatusResponse(BaseModel):
+    is_running: bool
+    is_paused: bool
+    fraud_regime: str
+    interval_ms: int
+    feedback_delay_ms: int
+    adaptive_learning_enabled: bool
+    transactions_generated: int
+    feedback_processed: int
+    pending_feedback_count: int
+    fraud_count_simulated: int
+    fraud_detected_fixed: int
+    fraud_detected_adaptive: int
+    fraud_missed_fixed: int
+    fraud_missed_adaptive: int
+    active_adaptive_version: str
+
 class SystemStatusResponse(BaseModel):
     app_name: str
     status: str

@@ -13,7 +13,11 @@ from backend.app.models.schemas import (
     FeedbackResponse,
     RollbackResponse,
     TransactionCreate,
-    TransactionResponse
+    TransactionResponse,
+    SimulatorConfigUpdate,
+    SimulatorStatusResponse,
+    ModelComparisonResponse,
+    ModelMetrics
 )
 from backend.app.models.db_models import (
     DBTransaction,
@@ -23,6 +27,8 @@ from backend.app.models.db_models import (
     DBAuditLog
 )
 from backend.app.services.adaptive_learning_service import adaptive_service
+from backend.app.services.transaction_simulator import simulator
+from backend.app.ml.evaluation import compute_metrics, compare_models
 
 router = APIRouter()
 
@@ -174,3 +180,126 @@ def rollback_model(db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Rollback error: {str(e)}"
         )
+
+# --- Simulator Control Endpoints ---
+
+@router.post("/simulator/start", response_model=SimulatorStatusResponse, tags=["Simulator"])
+async def start_simulator():
+    """Start the asynchronous real-time transaction simulator."""
+    await simulator.start()
+    return simulator.get_status()
+
+@router.post("/simulator/pause", response_model=SimulatorStatusResponse, tags=["Simulator"])
+async def pause_simulator():
+    """Pause the transaction simulator."""
+    await simulator.pause()
+    return simulator.get_status()
+
+@router.post("/simulator/resume", response_model=SimulatorStatusResponse, tags=["Simulator"])
+async def resume_simulator():
+    """Resume the paused transaction simulator."""
+    await simulator.resume()
+    return simulator.get_status()
+
+@router.post("/simulator/stop", response_model=SimulatorStatusResponse, tags=["Simulator"])
+async def stop_simulator():
+    """Stop the transaction simulator."""
+    await simulator.stop()
+    return simulator.get_status()
+
+@router.get("/simulator/status", response_model=SimulatorStatusResponse, tags=["Simulator"])
+def get_simulator_status():
+    """Fetch current running state, transaction counts, and parameters of the simulator."""
+    return simulator.get_status()
+
+@router.post("/simulator/config", response_model=SimulatorStatusResponse, tags=["Simulator"])
+def update_simulator_config(config: SimulatorConfigUpdate):
+    """
+    Update simulation parameters at runtime:
+    - interval_ms: speed of generation (100-5000ms)
+    - feedback_delay_ms: delay before ground truth feedback is ingested
+    - fraud_regime: 'normal', 'historical', or 'drift_evasion'
+    - adaptive_learning_enabled: toggle online model updates
+    """
+    try:
+        updated = simulator.update_config(
+            interval_ms=config.interval_ms,
+            feedback_delay_ms=config.feedback_delay_ms,
+            fraud_regime=config.fraud_regime,
+            adaptive_learning_enabled=config.adaptive_learning_enabled
+        )
+        return updated
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+
+# --- Dashboard Metrics Endpoint ---
+
+@router.get("/metrics/comparison", response_model=ModelComparisonResponse, tags=["Models"])
+def get_model_comparison(
+    window: int = Query(200, ge=20, le=2000),
+    db: Session = Depends(get_db)
+):
+    """
+    Compare Fixed model vs Adaptive model performance on recent verified transactions.
+    """
+    txs = (
+        db.query(DBTransaction)
+        .filter(DBTransaction.feedback_received == True)
+        .order_by(DBTransaction.id.desc())
+        .limit(window)
+        .all()
+    )
+
+    if not txs:
+        empty_metrics = ModelMetrics(
+            model_name="baseline",
+            version_tag="v1.0",
+            sample_count=0,
+            accuracy=0.0,
+            precision=0.0,
+            recall=0.0,
+            f1_score=0.0,
+            fpr=0.0,
+            fnr=0.0
+        )
+        return ModelComparisonResponse(
+            fixed_model=empty_metrics,
+            adaptive_model=empty_metrics,
+            evaluated_samples=0,
+            recent_window_size=window,
+            drift_detected=False,
+            summary="No verified feedback samples recorded yet."
+        )
+
+    # Reverse to chronological order
+    txs = list(reversed(txs))
+    y_true = [tx.feedback_label for tx in txs]
+    fixed_preds = [tx.fixed_prediction for tx in txs]
+    adaptive_preds = [tx.adaptive_prediction for tx in txs]
+
+    fixed_res = compute_metrics(y_true, fixed_preds, model_name="fixed", version_tag="v1.0-fixed")
+    adaptive_res = compute_metrics(
+        y_true,
+        adaptive_preds,
+        model_name="adaptive",
+        version_tag=adaptive_service.adaptive_model.version_tag if adaptive_service.adaptive_model else "adaptive"
+    )
+
+    drift_info = adaptive_service.drift_detector.check_drift()
+
+    summary_text = (
+        f"Evaluated on {len(y_true)} verified transactions. "
+        f"Fixed F1: {fixed_res['f1_score']:.4f} (Recall: {fixed_res['recall']:.2%}), "
+        f"Adaptive F1: {adaptive_res['f1_score']:.4f} (Recall: {adaptive_res['recall']:.2%}). "
+        f"Drift Status: {drift_info['severity']}."
+    )
+
+    return ModelComparisonResponse(
+        fixed_model=ModelMetrics(**fixed_res),
+        adaptive_model=ModelMetrics(**adaptive_res),
+        evaluated_samples=len(y_true),
+        recent_window_size=window,
+        drift_detected=drift_info["drift_detected"],
+        summary=summary_text
+    )
+
