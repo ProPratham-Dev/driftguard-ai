@@ -3,23 +3,23 @@ import { Layers, Clock, ShieldCheck, AlertCircle } from 'lucide-react';
 
 function LiveTransactionFeedComponent({ transactions }) {
   return (
-    <div id="transactions" className="bg-card border border-theme rounded-xl p-5 theme-card-shadow">
-      <div className="flex items-center justify-between pb-3 border-b border-theme">
+    <div id="transactions" className="bg-card border border-theme rounded-xl p-5 sm:p-6 theme-card-shadow">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-theme gap-2">
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-accent-theme" />
-          <h3 className="text-xs font-bold text-primary uppercase tracking-wider">
+          <h3 className="text-sm font-bold text-primary uppercase tracking-wider">
             Live Streaming Transactions & Real-Time Predictions
           </h3>
         </div>
-        <span className="text-[11px] font-mono text-secondary">
-          Buffered latest {transactions?.length || 0} / 100 records
+        <span className="text-xs font-mono text-secondary">
+          Buffered latest <strong className="text-primary">{transactions?.length || 0}</strong> / 100 records
         </span>
       </div>
 
-      <div className="overflow-x-auto mt-3">
-        <table className="w-full text-left text-xs font-mono border-collapse">
+      <div className="overflow-x-auto mt-3.5">
+        <table className="w-full text-left text-xs sm:text-[13px] font-mono border-collapse">
           <thead>
-            <tr className="border-b border-theme text-secondary text-[11px]">
+            <tr className="border-b border-theme text-secondary text-xs">
               <th className="py-2.5 px-3">TX ID</th>
               <th className="py-2.5 px-3">Amount</th>
               <th className="py-2.5 px-3">Category</th>
@@ -33,8 +33,11 @@ function LiveTransactionFeedComponent({ transactions }) {
           <tbody className="divide-y divide-subtle-theme">
             {transactions?.length === 0 ? (
               <tr>
-                <td colSpan="8" className="py-8 text-center text-secondary italic">
-                  No live transactions received yet. Click "Start Stream" or "1. Normal Traffic" above.
+                <td colSpan="8" className="py-10 text-center text-secondary italic">
+                  <div className="max-w-md mx-auto space-y-1">
+                    <p className="font-semibold text-primary not-italic text-sm">No Live Transactions In Buffer</p>
+                    <p className="text-xs">Click "Start Stream" or "1. Normal Traffic" in the simulator controls above to begin streaming transactions.</p>
+                  </div>
                 </td>
               </tr>
             ) : (

@@ -17,7 +17,7 @@ function SimulatorControlsComponent({
   const adaptiveEnabled = simulatorStatus?.adaptive_learning_enabled ?? true;
 
   return (
-    <div id="simulator" className="bg-card border border-theme rounded-xl p-5 theme-card-shadow">
+    <div id="simulator" className="bg-card border border-theme rounded-xl p-5 sm:p-6 theme-card-shadow">
       
       {/* Title & Stream Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-theme gap-3">
@@ -26,7 +26,7 @@ function SimulatorControlsComponent({
             <Zap className="w-4 h-4 text-accent-theme" />
             Hackathon Demonstration Controls
           </h2>
-          <p className="text-xs text-secondary mt-0.5">
+          <p className="text-[13px] text-secondary mt-1">
             Interactive controls demonstrating concept drift emergence and online adaptive defense.
           </p>
         </div>
@@ -68,7 +68,7 @@ function SimulatorControlsComponent({
       </div>
 
       {/* 3 Core Hackathon Demo Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 my-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 my-4">
         
         {/* Step 1: Normal Traffic */}
         <button
@@ -76,14 +76,14 @@ function SimulatorControlsComponent({
             updateConfig({ fraud_regime: 'normal' });
             if (!isRunning) startSimulator();
           }}
-          className={`flex flex-col p-3 rounded-lg border text-left transition-all cursor-pointer ${
+          className={`flex flex-col p-3.5 sm:p-4 rounded-xl border text-left transition-all cursor-pointer ${
             regime === 'normal'
               ? 'bg-emerald-500/10 border-emerald-500/50 shadow-xs'
               : 'bg-card-subtle/50 border-theme hover:border-emerald-500/30'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-primary uppercase tracking-wider">
+            <span className="text-xs sm:text-[13px] font-bold text-primary uppercase tracking-wider">
               1. Normal Traffic
             </span>
             <span
@@ -92,7 +92,7 @@ function SimulatorControlsComponent({
               }`}
             />
           </div>
-          <p className="text-[11px] text-secondary mt-1.5 leading-snug">
+          <p className="text-xs sm:text-[13px] text-secondary mt-1.5 leading-relaxed">
             Emits benign card transactions. Both static and adaptive models operate with near-zero error.
           </p>
         </button>
@@ -103,14 +103,14 @@ function SimulatorControlsComponent({
             updateConfig({ fraud_regime: 'drift_evasion' });
             if (!isRunning) startSimulator();
           }}
-          className={`flex flex-col p-3 rounded-lg border text-left transition-all cursor-pointer ${
+          className={`flex flex-col p-3.5 sm:p-4 rounded-xl border text-left transition-all cursor-pointer ${
             regime === 'drift_evasion'
               ? 'bg-sky-500/10 border-sky-500/50 shadow-xs'
               : 'bg-card-subtle/50 border-theme hover:border-sky-500/30'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-accent-theme uppercase tracking-wider">
+            <span className="text-xs sm:text-[13px] font-bold text-accent-theme uppercase tracking-wider">
               2. Introduce New Fraud Pattern
             </span>
             <span
@@ -119,7 +119,7 @@ function SimulatorControlsComponent({
               }`}
             />
           </div>
-          <p className="text-[11px] text-secondary mt-1.5 leading-snug">
+          <p className="text-xs sm:text-[13px] text-secondary mt-1.5 leading-relaxed">
             Switches to nocturnal micro-velocity evasion. Fixed model recall crashes; ASW-DD triggers CRITICAL drift.
           </p>
         </button>
@@ -127,14 +127,14 @@ function SimulatorControlsComponent({
         {/* Step 3: Enable Adaptive Learning */}
         <button
           onClick={() => updateConfig({ adaptive_learning_enabled: !adaptiveEnabled })}
-          className={`flex flex-col p-3 rounded-lg border text-left transition-all cursor-pointer ${
+          className={`flex flex-col p-3.5 sm:p-4 rounded-xl border text-left transition-all cursor-pointer ${
             adaptiveEnabled
               ? 'bg-blue-500/10 border-blue-500/50 shadow-xs'
               : 'bg-card-subtle/50 border-theme opacity-70'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-primary uppercase tracking-wider">
+            <span className="text-xs sm:text-[13px] font-bold text-primary uppercase tracking-wider">
               3. Adaptive Online Learning
             </span>
             <span
@@ -147,7 +147,7 @@ function SimulatorControlsComponent({
               {adaptiveEnabled ? 'ACTIVE' : 'OFF'}
             </span>
           </div>
-          <p className="text-[11px] text-secondary mt-1.5 leading-snug">
+          <p className="text-xs sm:text-[13px] text-secondary mt-1.5 leading-relaxed">
             Trains candidate models on delayed verified feedback and auto-promotes to restore fraud recall.
           </p>
         </button>
@@ -155,7 +155,7 @@ function SimulatorControlsComponent({
       </div>
 
       {/* Sliders: Rate & Feedback Delay */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-3 border-t border-theme text-xs">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-3.5 border-t border-theme text-xs sm:text-[13px]">
         
         {/* Stream Speed Slider */}
         <div className="space-y-1.5">

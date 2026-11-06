@@ -18,7 +18,8 @@ export default function Header({ isConnected, simulatorStatus, onOpenMobileMenu 
   const regime = simulatorStatus?.fraud_regime || 'normal';
 
   return (
-    <header className="h-16 px-4 sm:px-6 bg-card border-b border-theme sticky top-0 z-30 flex items-center justify-between transition-colors duration-200">
+    <header className="h-16 px-4 sm:px-6 lg:px-8 bg-card border-b border-theme sticky top-0 z-30 transition-colors duration-200">
+      <div className="max-w-[1480px] w-full h-full mx-auto flex items-center justify-between">
       
       {/* Left: Mobile Menu Toggle & Title */}
       <div className="flex items-center gap-3">
@@ -35,9 +36,9 @@ export default function Header({ isConnected, simulatorStatus, onOpenMobileMenu 
             <ShieldAlert className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-wide text-primary flex items-center gap-1.5">
+            <h1 className="text-base font-bold tracking-wide text-primary flex items-center gap-1.5">
               DRIFT<span className="text-accent-theme">GUARD</span>
-              <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] font-mono bg-card-subtle text-secondary border border-theme">
+              <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[11px] font-mono bg-card-subtle text-secondary border border-theme">
                 AI v1.0
               </span>
             </h1>
@@ -101,6 +102,7 @@ export default function Header({ isConnected, simulatorStatus, onOpenMobileMenu 
           )}
         </button>
 
+      </div>
       </div>
     </header>
   );

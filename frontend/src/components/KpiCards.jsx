@@ -21,19 +21,19 @@ function KpiCardsComponent({ simulatorStatus, driftStatus }) {
   };
 
   return (
-    <div id="overview" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+    <div id="overview" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
       
       {/* 1. Transactions Processed */}
-      <div className="bg-card border border-theme rounded-xl p-4 theme-card-shadow flex flex-col justify-between">
+      <div className="bg-card border border-theme rounded-xl p-4 sm:p-5 theme-card-shadow flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-mono text-secondary uppercase tracking-wider">Transactions</span>
+          <span className="text-xs font-mono font-semibold text-secondary uppercase tracking-wider">Transactions</span>
           <div className="p-1.5 rounded-lg bg-card-subtle text-accent-theme">
             <Layers className="w-4 h-4" />
           </div>
         </div>
         <div className="mt-3">
-          <div className="text-2xl font-bold font-mono text-primary">{totalTx.toLocaleString()}</div>
-          <div className="text-[11px] text-secondary mt-1 flex items-center justify-between">
+          <div className="text-2xl sm:text-3xl font-bold font-mono text-primary tracking-tight">{totalTx.toLocaleString()}</div>
+          <div className="text-xs sm:text-[13px] text-secondary mt-2 flex items-center justify-between">
             <span>Verified:</span>
             <span className="font-mono text-accent-theme font-semibold">{feedbackCount.toLocaleString()}</span>
           </div>
@@ -41,16 +41,16 @@ function KpiCardsComponent({ simulatorStatus, driftStatus }) {
       </div>
 
       {/* 2. Fraud Detected */}
-      <div className="bg-card border border-theme rounded-xl p-4 theme-card-shadow flex flex-col justify-between">
+      <div className="bg-card border border-theme rounded-xl p-4 sm:p-5 theme-card-shadow flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-mono text-secondary uppercase tracking-wider">Fraud Detected</span>
+          <span className="text-xs font-mono font-semibold text-secondary uppercase tracking-wider">Fraud Caught</span>
           <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500">
             <ShieldCheck className="w-4 h-4" />
           </div>
         </div>
         <div className="mt-3">
-          <div className="text-2xl font-bold font-mono text-emerald-500 dark:text-emerald-400">{adaptiveDetected}</div>
-          <div className="text-[11px] text-secondary mt-1 flex items-center justify-between">
+          <div className="text-2xl sm:text-3xl font-bold font-mono text-emerald-500 dark:text-emerald-400 tracking-tight">{adaptiveDetected}</div>
+          <div className="text-xs sm:text-[13px] text-secondary mt-2 flex items-center justify-between">
             <span>Fixed Model caught:</span>
             <span className="font-mono text-primary font-medium">{fixedDetected} / {fraudSimulated}</span>
           </div>
@@ -58,19 +58,19 @@ function KpiCardsComponent({ simulatorStatus, driftStatus }) {
       </div>
 
       {/* 3. Fraud Missed (False Negatives) */}
-      <div className="bg-card border border-theme rounded-xl p-4 theme-card-shadow flex flex-col justify-between">
+      <div className="bg-card border border-theme rounded-xl p-4 sm:p-5 theme-card-shadow flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-mono text-secondary uppercase tracking-wider">Missed Fraud (FN)</span>
+          <span className="text-xs font-mono font-semibold text-secondary uppercase tracking-wider">Missed Fraud (FN)</span>
           <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-500">
             <AlertTriangle className="w-4 h-4" />
           </div>
         </div>
         <div className="mt-3">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold font-mono text-accent-theme">{adaptiveMissed}</span>
-            <span className="text-[11px] text-secondary">adaptive</span>
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-accent-theme tracking-tight">{adaptiveMissed}</span>
+            <span className="text-xs text-secondary">adaptive</span>
           </div>
-          <div className="text-[11px] text-secondary mt-1 flex items-center justify-between">
+          <div className="text-xs sm:text-[13px] text-secondary mt-2 flex items-center justify-between">
             <span>Fixed Missed:</span>
             <span className="font-mono font-bold text-rose-500">
               {fixedMissed} ({fraudSimulated > 0 ? `${Math.round((fixedMissed / fraudSimulated) * 100)}%` : '0%'})
@@ -80,18 +80,18 @@ function KpiCardsComponent({ simulatorStatus, driftStatus }) {
       </div>
 
       {/* 4. Active Model Version */}
-      <div className="bg-card border border-theme rounded-xl p-4 theme-card-shadow flex flex-col justify-between">
+      <div className="bg-card border border-theme rounded-xl p-4 sm:p-5 theme-card-shadow flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-mono text-secondary uppercase tracking-wider">Adaptive Model</span>
+          <span className="text-xs font-mono font-semibold text-secondary uppercase tracking-wider">Adaptive Model</span>
           <div className="p-1.5 rounded-lg bg-card-subtle text-accent-theme">
             <Cpu className="w-4 h-4" />
           </div>
         </div>
         <div className="mt-3">
-          <div className="text-lg font-bold font-mono text-primary truncate" title={activeVersion}>
+          <div className="text-xl sm:text-2xl font-bold font-mono text-primary truncate tracking-tight" title={activeVersion}>
             {activeVersion}
           </div>
-          <div className="text-[11px] text-secondary mt-1 flex items-center justify-between">
+          <div className="text-xs sm:text-[13px] text-secondary mt-2 flex items-center justify-between">
             <span>Fixed Baseline:</span>
             <span className="font-mono text-secondary">v1.0-static</span>
           </div>
@@ -99,9 +99,9 @@ function KpiCardsComponent({ simulatorStatus, driftStatus }) {
       </div>
 
       {/* 5. Concept Drift Severity */}
-      <div className="bg-card border border-theme rounded-xl p-4 theme-card-shadow flex flex-col justify-between">
+      <div className="bg-card border border-theme rounded-xl p-4 sm:p-5 theme-card-shadow flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-mono text-secondary uppercase tracking-wider">Drift Severity</span>
+          <span className="text-xs font-mono font-semibold text-secondary uppercase tracking-wider">Drift Severity</span>
           <div className="p-1.5 rounded-lg bg-card-subtle text-accent-theme">
             <Radio className="w-4 h-4" />
           </div>
@@ -113,7 +113,7 @@ function KpiCardsComponent({ simulatorStatus, driftStatus }) {
             </span>
             <span className="text-xs font-mono text-secondary">Score: {Math.round(driftScore * 100)}%</span>
           </div>
-          <div className="text-[11px] text-secondary mt-1 flex items-center justify-between">
+          <div className="text-xs sm:text-[13px] text-secondary mt-2 flex items-center justify-between">
             <span>Recent Error:</span>
             <span className="font-mono text-primary font-medium">
               {Math.round((driftStatus?.current_error_rate || 0) * 100)}%

@@ -49,26 +49,34 @@ function ModelComparisonComponent({ comparisonMetrics }) {
   const tooltipBorder = isDark ? '#263449' : '#E5EAF2';
 
   return (
-    <div id="models" className="bg-card border border-theme rounded-xl p-5 theme-card-shadow flex flex-col justify-between">
+    <div id="models" className="bg-card border border-theme rounded-xl p-5 sm:p-6 theme-card-shadow flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between pb-3 border-b border-theme">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-theme gap-2">
           <div className="flex items-center gap-2">
             <GitCompare className="w-4 h-4 text-accent-theme" />
-            <h3 className="text-xs font-bold text-primary uppercase tracking-wider">
+            <h3 className="text-sm font-bold text-primary uppercase tracking-wider">
               Fixed Model vs Adaptive Model
             </h3>
           </div>
-          <span className="text-[11px] font-mono text-secondary">
-            N={samples > 0 ? samples : '12,000'} evaluated
-          </span>
+          <div>
+            {samples > 0 ? (
+              <span className="px-2.5 py-1 rounded-md text-[11px] font-mono bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-semibold">
+                Live Stream (N={samples} evaluated)
+              </span>
+            ) : (
+              <span className="px-2.5 py-1 rounded-md text-[11px] font-mono bg-card-subtle border border-theme text-secondary font-medium">
+                Offline Benchmark (N=12,000 Holdout)
+              </span>
+            )}
+          </div>
         </div>
 
-        <p className="text-xs text-secondary my-3 leading-relaxed">
+        <p className="text-[13px] text-secondary my-3 leading-relaxed">
           Demonstrates fixed baseline decay when evasion attacks begin, compared with the online adaptive model's measured recovery.
         </p>
 
         {/* Recharts Grouped Bar Chart */}
-        <div className="h-60 w-full my-2">
+        <div className="h-64 w-full my-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
@@ -78,12 +86,12 @@ function ModelComparisonComponent({ comparisonMetrics }) {
               <XAxis
                 dataKey="metric"
                 stroke={textColor}
-                fontSize={11}
+                fontSize={12}
                 tickLine={false}
               />
               <YAxis
                 stroke={textColor}
-                fontSize={11}
+                fontSize={12}
                 domain={[0, 100]}
                 unit="%"
                 tickLine={false}
@@ -100,7 +108,7 @@ function ModelComparisonComponent({ comparisonMetrics }) {
                 formatter={(val) => [`${val}%`, '']}
               />
               <Legend
-                wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+                wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
               />
               <Bar
                 dataKey="Fixed"
@@ -120,11 +128,11 @@ function ModelComparisonComponent({ comparisonMetrics }) {
       </div>
 
       {/* Summary Highlight Box */}
-      <div className="mt-4 p-3 rounded-lg bg-card-subtle border border-theme text-xs text-secondary flex items-start gap-2.5">
+      <div className="mt-4 p-3.5 rounded-lg bg-card-subtle border border-theme text-xs sm:text-[13px] text-secondary flex items-start gap-2.5">
         <CheckCircle2 className="w-4 h-4 text-accent-theme shrink-0 mt-0.5" />
-        <div className="leading-relaxed text-[11px]">
-          <strong className="text-primary">Measured Result: </strong>
-          Fixed model recall crashes to <strong className="text-rose-500">42.0%</strong> under micro-velocity attacks.
+        <div className="leading-relaxed">
+          <strong className="text-primary font-semibold">Measured Result: </strong>
+          Fixed model recall crashes to <strong className="text-rose-500 font-bold">42.0%</strong> under micro-velocity attacks.
           Online learning via verified feedback restores recall to <strong className="text-emerald-500 font-bold">99.2%+</strong> without increasing false alerts.
         </div>
       </div>

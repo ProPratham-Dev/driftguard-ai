@@ -41,7 +41,7 @@ export default function Sidebar({ activeSection, setActiveSection, isOpen, onClo
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-64 bg-sidebar border-r border-theme flex flex-col justify-between transition-transform duration-200 ease-in-out shrink-0 ${
+        className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-60 bg-sidebar border-r border-theme flex flex-col justify-between transition-transform duration-200 ease-in-out shrink-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
@@ -110,3 +110,4 @@ export default function Sidebar({ activeSection, setActiveSection, isOpen, onClo
     </>
   );
 }
+

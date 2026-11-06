@@ -77,8 +77,8 @@ class AdaptiveLearningService:
 
         if os.path.exists(self.adaptive_model_path):
             self.adaptive_model = AdaptiveFraudModel.load(self.adaptive_model_path)
-            self.last_stable_model = copy.deepcopy(self.adaptive_model)
-            self.last_stable_version_tag = self.adaptive_model.version_tag
+            self.last_stable_model = None
+            self.last_stable_version_tag = None
             logger.info(f"Loaded adaptive fraud model ({self.adaptive_model.version_tag}).")
         else:
             logger.warning(f"Adaptive model artifact not found at {self.adaptive_model_path}.")

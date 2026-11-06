@@ -1,6 +1,7 @@
 import asyncio
 import time
 import logging
+import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List, Tuple
 from collections import deque
@@ -112,6 +113,11 @@ class TransactionSimulator:
 
     def get_status(self) -> Dict[str, Any]:
         """Return live simulator status and counters."""
+        can_rollback = False
+        if adaptive_service.adaptive_model and adaptive_service.last_stable_model:
+            if adaptive_service.last_stable_version_tag != adaptive_service.adaptive_model.version_tag:
+                can_rollback = True
+
         return {
             "is_running": self.is_running,
             "is_paused": self.is_paused,
@@ -127,7 +133,8 @@ class TransactionSimulator:
             "fraud_detected_adaptive": self.fraud_detected_adaptive,
             "fraud_missed_fixed": self.fraud_missed_fixed,
             "fraud_missed_adaptive": self.fraud_missed_adaptive,
-            "active_adaptive_version": adaptive_service.adaptive_model.version_tag if adaptive_service.adaptive_model else "unknown"
+            "active_adaptive_version": adaptive_service.adaptive_model.version_tag if adaptive_service.adaptive_model else "unknown",
+            "can_rollback": can_rollback
         }
 
     async def _run_loop(self):
@@ -163,7 +170,7 @@ class TransactionSimulator:
                     else:
                         tx_dict = self.generator.generate_legitimate_transaction(cust_id, now)
 
-                    tx_id = f"TX_LIVE_{self.transactions_generated + 1:07d}"
+                    tx_id = f"TX_{int(time.time() * 1000)}_{uuid.uuid4().hex[:6].upper()}"
                     tx_dict["tx_id"] = tx_id
                     ground_truth = tx_dict["is_fraud"]
 
@@ -246,6 +253,9 @@ class TransactionSimulator:
                                 "active_version": adaptive_service.adaptive_model.version_tag
                             })
 
+                except Exception as inner_e:
+                    db.rollback()
+                    raise inner_e
                 finally:
                     db.close()
 

@@ -63,9 +63,9 @@ def get_system_status(db: Session = Depends(get_db)):
     return SystemStatusResponse(
         app_name=settings.APP_NAME,
         status="operational",
-        simulator_active=False,
-        adaptive_learning_active=settings.ADAPTIVE_LEARNING_ENABLED,
-        active_fraud_pattern=settings.ACTIVE_FRAUD_PATTERN,
+        simulator_active=simulator.is_running and not simulator.is_paused,
+        adaptive_learning_active=simulator.adaptive_learning_enabled,
+        active_fraud_pattern=simulator.fraud_regime,
         total_transactions=total_tx,
         total_feedback_received=total_feedback,
         total_drift_events=total_drift,

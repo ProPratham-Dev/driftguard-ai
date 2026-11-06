@@ -48,7 +48,7 @@ function DashboardContent() {
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
         />
 
-        <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto space-y-5">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1480px] w-full mx-auto space-y-6">
           {/* Section 1: KPI Cards */}
           <KpiCards
             simulatorStatus={simulatorStatus}
@@ -66,7 +66,7 @@ function DashboardContent() {
           />
 
           {/* Section 3: Dual Grid (Model Comparison + Drift Monitoring) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <ModelComparison
               comparisonMetrics={comparisonMetrics}
             />
@@ -84,13 +84,14 @@ function DashboardContent() {
           {/* Section 5: Model Governance & Rollback */}
           <ModelLifecycle
             modelVersions={modelVersions}
+            simulatorStatus={simulatorStatus}
             triggerRollback={triggerRollback}
           />
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-theme bg-card py-4 px-6 text-xs text-secondary font-mono">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+        <footer className="border-t border-theme bg-card py-4 px-6 lg:px-8 text-xs text-secondary font-mono">
+          <div className="max-w-[1480px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
             <span>DRIFTGUARD AI — Adaptive Real-Time Fraud & Concept Drift Defense System</span>
             <span>NeuroForge 2026: The Moving Target</span>
           </div>

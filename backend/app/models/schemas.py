@@ -158,6 +158,7 @@ class SimulatorStatusResponse(BaseModel):
     fraud_missed_fixed: int
     fraud_missed_adaptive: int
     active_adaptive_version: str
+    can_rollback: bool = False
 
 class SystemStatusResponse(BaseModel):
     app_name: str

@@ -50,12 +50,12 @@ function DriftMonitorComponent({ driftStatus, driftEvents }) {
   const tooltipBorder = isDark ? '#263449' : '#E5EAF2';
 
   return (
-    <div id="drift" className="bg-card border border-theme rounded-xl p-5 theme-card-shadow flex flex-col justify-between">
+    <div id="drift" className="bg-card border border-theme rounded-xl p-5 sm:p-6 theme-card-shadow flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between pb-3 border-b border-theme">
           <div className="flex items-center gap-2">
             <Radio className={`w-4 h-4 ${severity === 'CRITICAL' ? 'text-rose-500 animate-pulse' : 'text-accent-theme'}`} />
-            <h3 className="text-xs font-bold text-primary uppercase tracking-wider">
+            <h3 className="text-sm font-bold text-primary uppercase tracking-wider">
               Concept Drift Detector (ASW-DD)
             </h3>
           </div>
@@ -65,33 +65,33 @@ function DriftMonitorComponent({ driftStatus, driftEvents }) {
         </div>
 
         {/* Live Sub-Window Gauges */}
-        <div className="grid grid-cols-2 gap-3 my-3">
-          <div className="bg-card-subtle border border-theme rounded-lg p-3">
-            <span className="text-[10px] uppercase font-mono text-secondary">Recent Window Error</span>
-            <div className="text-xl font-bold font-mono text-primary mt-1">
+        <div className="grid grid-cols-2 gap-3.5 my-3.5">
+          <div className="bg-card-subtle border border-theme rounded-lg p-3.5">
+            <span className="text-xs uppercase font-mono font-semibold text-secondary">Recent Window Error</span>
+            <div className="text-2xl font-bold font-mono text-primary mt-1">
               {(recentError * 100).toFixed(1)}%
             </div>
-            <span className="text-[10px] text-muted-custom font-mono">Last {recentCount} verified</span>
+            <span className="text-[11px] text-secondary font-mono">Last {recentCount} verified</span>
           </div>
 
-          <div className="bg-card-subtle border border-theme rounded-lg p-3">
-            <span className="text-[10px] uppercase font-mono text-secondary">Reference Window Error</span>
-            <div className="text-xl font-bold font-mono text-primary mt-1">
+          <div className="bg-card-subtle border border-theme rounded-lg p-3.5">
+            <span className="text-xs uppercase font-mono font-semibold text-secondary">Reference Window Error</span>
+            <div className="text-2xl font-bold font-mono text-primary mt-1">
               {(refError * 100).toFixed(1)}%
             </div>
-            <span className="text-[10px] text-muted-custom font-mono">Historical baseline</span>
+            <span className="text-[11px] text-secondary font-mono">Historical baseline</span>
           </div>
         </div>
 
         {/* Drift Score Meter */}
-        <div className="space-y-1.5 my-2">
-          <div className="flex justify-between text-xs font-mono">
-            <span className="text-secondary">Normalized Drift Score:</span>
+        <div className="space-y-1.5 my-2.5">
+          <div className="flex justify-between text-xs sm:text-[13px] font-mono">
+            <span className="text-secondary font-medium">Normalized Drift Score:</span>
             <span className={`font-bold ${driftScore > 0.6 ? 'text-rose-500' : driftScore > 0.3 ? 'text-amber-500' : 'text-emerald-500'}`}>
               {(driftScore * 100).toFixed(0)}%
             </span>
           </div>
-          <div className="w-full h-2 bg-card-subtle rounded-full overflow-hidden border border-theme">
+          <div className="w-full h-2.5 bg-card-subtle rounded-full overflow-hidden border border-theme">
             <div
               className={`h-full rounded-full transition-all duration-300 ${
                 driftScore > 0.6 ? 'bg-rose-500' : driftScore > 0.3 ? 'bg-amber-500' : 'bg-emerald-500'
@@ -101,19 +101,19 @@ function DriftMonitorComponent({ driftStatus, driftEvents }) {
           </div>
         </div>
 
-        {/* Small Trend Area Chart */}
+        {/* Trend Area Chart */}
         <div className="h-28 w-full mt-2">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={timelineData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-              <XAxis dataKey="time" stroke={textColor} fontSize={10} tickLine={false} />
-              <YAxis stroke={textColor} fontSize={10} domain={[0, 50]} unit="%" tickLine={false} />
+              <XAxis dataKey="time" stroke={textColor} fontSize={11} tickLine={false} />
+              <YAxis stroke={textColor} fontSize={11} domain={[0, 50]} unit="%" tickLine={false} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: tooltipBg,
                   borderColor: tooltipBorder,
                   borderRadius: '6px',
-                  fontSize: '11px',
+                  fontSize: '12px',
                   color: isDark ? '#F1F5F9' : '#172033'
                 }}
                 formatter={(val) => [`${val}%`, 'Error Rate']}
@@ -132,19 +132,20 @@ function DriftMonitorComponent({ driftStatus, driftEvents }) {
       </div>
 
       {/* Drift Events Timeline Log */}
-      <div className="mt-3 pt-3 border-t border-theme">
+      <div className="mt-3.5 pt-3.5 border-t border-theme">
         <span className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5 mb-2">
           <Clock className="w-3.5 h-3.5 text-accent-theme" /> Event Log
         </span>
 
         {driftEvents?.length === 0 ? (
-          <div className="text-[11px] text-muted-custom italic py-1">
-            No drift events logged yet. Trigger "Introduce New Fraud Pattern" above to initiate.
+          <div className="p-3 rounded-lg bg-card-subtle/50 border border-theme text-xs text-secondary italic flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            No drift events detected yet. Click "2. Introduce New Fraud Pattern" above to initiate evasion traffic.
           </div>
         ) : (
           <div className="space-y-1.5 max-h-24 overflow-y-auto pr-1">
             {driftEvents.slice(0, 3).map((evt, idx) => (
-              <div key={idx} className="flex items-center justify-between text-[11px] font-mono p-1.5 rounded bg-card-subtle border border-theme">
+              <div key={idx} className="flex items-center justify-between text-xs font-mono p-2 rounded bg-card-subtle border border-theme">
                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                   evt.severity === 'CRITICAL'
                     ? 'bg-rose-500/20 text-rose-500'
@@ -152,8 +153,8 @@ function DriftMonitorComponent({ driftStatus, driftEvents }) {
                 }`}>
                   {evt.severity}
                 </span>
-                <span className="text-primary truncate max-w-[170px]">{evt.details || 'Error rate shift'}</span>
-                <span className="text-muted-custom text-[10px]">{new Date(evt.timestamp).toLocaleTimeString()}</span>
+                <span className="text-primary truncate max-w-[200px]">{evt.details || 'Error rate shift'}</span>
+                <span className="text-secondary text-[11px]">{new Date(evt.timestamp).toLocaleTimeString()}</span>
               </div>
             ))}
           </div>

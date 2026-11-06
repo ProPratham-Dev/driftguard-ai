@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { History, RotateCcw } from 'lucide-react';
 
-function ModelLifecycleComponent({ modelVersions, triggerRollback }) {
+function ModelLifecycleComponent({ modelVersions, simulatorStatus, triggerRollback }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [rollbackMsg, setRollbackMsg] = useState('');
   const [isRollingBack, setIsRollingBack] = useState(false);
+
+  const canRollback = simulatorStatus?.can_rollback ?? (modelVersions && modelVersions.length > 1);
 
   const handleRollback = async () => {
     setIsRollingBack(true);
@@ -20,11 +22,11 @@ function ModelLifecycleComponent({ modelVersions, triggerRollback }) {
   };
 
   return (
-    <div id="audit" className="bg-card border border-theme rounded-xl p-5 theme-card-shadow">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-theme gap-3">
+    <div id="audit" className="bg-card border border-theme rounded-xl p-5 sm:p-6 theme-card-shadow">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-theme gap-3">
         <div className="flex items-center gap-2">
           <History className="w-4 h-4 text-accent-theme" />
-          <h3 className="text-xs font-bold text-primary uppercase tracking-wider">
+          <h3 className="text-sm font-bold text-primary uppercase tracking-wider">
             Model Governance, Retraining Logs & Version Rollback
           </h3>
         </div>
@@ -32,15 +34,28 @@ function ModelLifecycleComponent({ modelVersions, triggerRollback }) {
         {/* Rollback Trigger Button */}
         <div>
           {!showConfirm ? (
-            <button
-              onClick={() => setShowConfirm(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card-subtle hover:bg-card-subtle/80 border border-theme text-xs font-mono text-accent-theme transition-all cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" /> Rollback Version
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                disabled={!canRollback}
+                onClick={() => canRollback && setShowConfirm(true)}
+                title={canRollback ? 'Restore previous stable model version' : 'Rollback disabled: No prior stable model version exists yet.'}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-mono transition-all ${
+                  canRollback
+                    ? 'bg-card-subtle hover:bg-card-subtle/80 border-theme text-accent-theme cursor-pointer'
+                    : 'bg-card-subtle/40 border-theme text-secondary opacity-50 cursor-not-allowed'
+                }`}
+              >
+                <RotateCcw className="w-3.5 h-3.5" /> Rollback Version
+              </button>
+              {!canRollback && (
+                <span className="text-[11px] font-mono text-secondary hidden md:inline">
+                  (Initial v1.0 active)
+                </span>
+              )}
+            </div>
           ) : (
             <div className="flex items-center gap-2 bg-card-subtle border border-amber-500/50 p-1.5 rounded-lg">
-              <span className="text-[11px] text-amber-500 font-medium">Confirm restore stable version?</span>
+              <span className="text-xs text-amber-500 font-medium">Confirm restore previous version?</span>
               <button
                 onClick={handleRollback}
                 disabled={isRollingBack}
@@ -60,30 +75,33 @@ function ModelLifecycleComponent({ modelVersions, triggerRollback }) {
       </div>
 
       {rollbackMsg && (
-        <div className="my-3 p-2.5 rounded bg-sky-500/10 border border-sky-500/30 text-xs text-sky-600 dark:text-sky-300 font-mono">
+        <div className="my-3 p-2.5 rounded bg-sky-500/10 border border-sky-500/30 text-xs sm:text-[13px] text-sky-600 dark:text-sky-300 font-mono">
           {rollbackMsg}
         </div>
       )}
 
       {/* Model Versions Audit Table */}
-      <div className="overflow-x-auto mt-3">
-        <table className="w-full text-left text-xs font-mono border-collapse">
+      <div className="overflow-x-auto mt-3.5">
+        <table className="w-full text-left text-xs sm:text-[13px] font-mono border-collapse">
           <thead>
-            <tr className="border-b border-theme text-secondary text-[11px]">
-              <th className="py-2 px-3">Version Tag</th>
-              <th className="py-2 px-3">Model Type</th>
-              <th className="py-2 px-3">Status</th>
-              <th className="py-2 px-3">Recall</th>
-              <th className="py-2 px-3">F1-Score</th>
-              <th className="py-2 px-3">Samples</th>
-              <th className="py-2 px-3 text-right">Trained At</th>
+            <tr className="border-b border-theme text-secondary text-xs">
+              <th className="py-2.5 px-3">Version Tag</th>
+              <th className="py-2.5 px-3">Model Type</th>
+              <th className="py-2.5 px-3">Status</th>
+              <th className="py-2.5 px-3">Recall</th>
+              <th className="py-2.5 px-3">F1-Score</th>
+              <th className="py-2.5 px-3">Samples</th>
+              <th className="py-2.5 px-3 text-right">Trained At</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-subtle-theme">
             {modelVersions?.length === 0 ? (
               <tr>
-                <td colSpan="7" className="py-6 text-center text-secondary italic">
-                  No model version history found.
+                <td colSpan="7" className="py-8 text-center text-secondary italic">
+                  <div className="max-w-md mx-auto text-center space-y-1">
+                    <p className="font-semibold text-primary not-italic">No Retrained Versions Yet</p>
+                    <p className="text-xs">Baseline adaptive model v1.0 is currently active. Candidate models will be listed here upon verified holdout evaluation.</p>
+                  </div>
                 </td>
               </tr>
             ) : (
