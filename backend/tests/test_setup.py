@@ -153,3 +153,4 @@ def test_fastapi_endpoints():
         status_data = res_status.json()
         assert status_data["app_name"] == "DriftGuard AI"
         assert status_data["status"] == "operational"
+

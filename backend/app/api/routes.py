@@ -46,3 +46,4 @@ def get_system_status(db: Session = Depends(get_db)):
         active_alerts_count=active_alerts,
         active_adaptive_version=active_version
     )
+

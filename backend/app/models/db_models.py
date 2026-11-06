@@ -100,3 +100,4 @@ class DBAuditLog(Base):
     action = Column(String(100), nullable=False)
     performed_by = Column(String(50), default="system")
     details = Column(Text, default="")
+
