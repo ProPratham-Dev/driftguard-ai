@@ -12,7 +12,7 @@ function LiveTransactionFeedComponent({ transactions }) {
           </h3>
         </div>
         <span className="text-xs font-mono text-secondary">
-          Buffered latest <strong className="text-primary">{transactions?.length || 0}</strong> / 100 records
+          Buffered latest <strong className="text-primary">{transactions?.length || 0}</strong> / 100 records (Streaming from N=12,000 synthetic generator pool)
         </span>
       </div>
 

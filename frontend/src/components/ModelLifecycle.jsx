@@ -26,9 +26,14 @@ function ModelLifecycleComponent({ modelVersions, simulatorStatus, triggerRollba
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-theme gap-3">
         <div className="flex items-center gap-2">
           <History className="w-4 h-4 text-accent-theme" />
-          <h3 className="text-sm font-bold text-primary uppercase tracking-wider">
-            Model Governance, Retraining Logs & Version Rollback
-          </h3>
+          <div>
+            <h3 className="text-sm font-bold text-primary uppercase tracking-wider">
+              Model Governance, Retraining Logs & Version Rollback
+            </h3>
+            <p className="text-xs text-secondary mt-0.5">
+              Governance and model lineage across the <strong>N=12,000 synthetic dataset</strong> (Historical Holdout: <strong>N=1,700</strong> | Concept-Drift Benchmark: <strong>N=4,800</strong>).
+            </p>
+          </div>
         </div>
 
         {/* Rollback Trigger Button */}
@@ -100,7 +105,7 @@ function ModelLifecycleComponent({ modelVersions, simulatorStatus, triggerRollba
                 <td colSpan="7" className="py-8 text-center text-secondary italic">
                   <div className="max-w-md mx-auto text-center space-y-1">
                     <p className="font-semibold text-primary not-italic">No Retrained Versions Yet</p>
-                    <p className="text-xs">Baseline adaptive model v1.0 is currently active. Candidate models will be listed here upon verified holdout evaluation.</p>
+                    <p className="text-xs">Baseline adaptive model v1.0 is currently active (trained on historical baseline N=5,500, verified on historical holdout N=1,700). Candidate models will be listed here upon verified holdout evaluation across the N=4,800 drift-stream.</p>
                   </div>
                 </td>
               </tr>

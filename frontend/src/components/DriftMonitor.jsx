@@ -52,14 +52,19 @@ function DriftMonitorComponent({ driftStatus, driftEvents }) {
   return (
     <div id="drift" className="bg-card border border-theme rounded-xl p-5 sm:p-6 theme-card-shadow flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between pb-3 border-b border-theme">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-theme gap-2">
           <div className="flex items-center gap-2">
             <Radio className={`w-4 h-4 ${severity === 'CRITICAL' ? 'text-rose-500 animate-pulse' : 'text-accent-theme'}`} />
-            <h3 className="text-sm font-bold text-primary uppercase tracking-wider">
-              Concept Drift Detector (ASW-DD)
-            </h3>
+            <div>
+              <h3 className="text-sm font-bold text-primary uppercase tracking-wider">
+                Concept Drift Detector (ASW-DD)
+              </h3>
+              <p className="text-[11px] text-secondary font-mono">
+                Sliding-window monitor calibrated on N=4,800 concept-drift benchmark
+              </p>
+            </div>
           </div>
-          <span className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold border ${severityBadgeClass[severity] || severityBadgeClass.NORMAL}`}>
+          <span className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold border self-start sm:self-auto ${severityBadgeClass[severity] || severityBadgeClass.NORMAL}`}>
             {severity}
           </span>
         </div>

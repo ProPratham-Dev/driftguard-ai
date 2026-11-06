@@ -268,7 +268,7 @@ def get_model_comparison(
             evaluated_samples=0,
             recent_window_size=window,
             drift_detected=False,
-            summary="No verified feedback samples recorded yet."
+            summary="No live verified feedback samples recorded yet. Dashboard displays audited Concept-Drift Benchmark (N=4,800 stream from N=12,000 total dataset; Historical Holdout N=1,700)."
         )
 
     # Reverse to chronological order

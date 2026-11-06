@@ -27,7 +27,7 @@ function SimulatorControlsComponent({
             Hackathon Demonstration Controls
           </h2>
           <p className="text-[13px] text-secondary mt-1">
-            Interactive controls demonstrating concept drift emergence and online adaptive defense.
+            Interactive controls demonstrating concept drift emergence and online adaptive defense (calibrated on <strong>N=12,000 total dataset</strong>, with <strong>N=1,700 historical holdout</strong> and <strong>N=4,800 concept-drift benchmark</strong>).
           </p>
         </div>
 
@@ -120,7 +120,7 @@ function SimulatorControlsComponent({
             />
           </div>
           <p className="text-xs sm:text-[13px] text-secondary mt-1.5 leading-relaxed">
-            Switches to nocturnal micro-velocity evasion. Fixed model recall crashes; ASW-DD triggers CRITICAL drift.
+            Switches to nocturnal micro-velocity evasion (N=4,800 drift regime). Fixed model recall crashes; ASW-DD triggers CRITICAL drift.
           </p>
         </button>
 

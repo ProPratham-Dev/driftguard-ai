@@ -64,15 +64,28 @@ function ModelComparisonComponent({ comparisonMetrics }) {
                 Live Stream (N={samples} evaluated)
               </span>
             ) : (
-              <span className="px-2.5 py-1 rounded-md text-[11px] font-mono bg-card-subtle border border-theme text-secondary font-medium">
-                Offline Benchmark (N=12,000 Holdout)
+              <span className="px-2.5 py-1 rounded-md text-[11px] font-mono bg-sky-500/10 border border-sky-500/30 text-sky-600 dark:text-sky-400 font-semibold">
+                Concept-Drift Benchmark (N=4,800)
               </span>
             )}
           </div>
         </div>
 
-        <p className="text-[13px] text-secondary my-3 leading-relaxed">
-          Demonstrates fixed baseline decay when evasion attacks begin, compared with the online adaptive model's measured recovery.
+        {/* Dataset Partition Breakdown Badges */}
+        <div className="flex flex-wrap items-center gap-2 my-3 text-xs font-mono">
+          <span className="px-2 py-0.5 rounded bg-card-subtle border border-theme text-secondary">
+            Total Dataset: <strong className="text-primary">N=12,000</strong>
+          </span>
+          <span className="px-2 py-0.5 rounded bg-card-subtle border border-theme text-secondary">
+            Historical Holdout: <strong className="text-primary">N=1,700</strong>
+          </span>
+          <span className="px-2 py-0.5 rounded bg-accent-theme/10 border border-accent-theme/30 text-accent-theme font-semibold">
+            Concept-Drift Benchmark: <strong className="text-accent-theme">N=4,800</strong>
+          </span>
+        </div>
+
+        <p className="text-[13px] text-secondary mb-3 leading-relaxed">
+          Evaluated across <strong>N=4,800 concept-drift stream records</strong> (from the <strong>N=12,000 total dataset</strong>). Demonstrates fixed baseline recall crashing from 100% on historical holdout (N=1,700) down to <strong>42.02%</strong> under nocturnal micro-velocity evasion, compared with the online adaptive model's measured recovery to <strong>99.17%</strong>.
         </p>
 
         {/* Recharts Grouped Bar Chart */}
@@ -131,9 +144,9 @@ function ModelComparisonComponent({ comparisonMetrics }) {
       <div className="mt-4 p-3.5 rounded-lg bg-card-subtle border border-theme text-xs sm:text-[13px] text-secondary flex items-start gap-2.5">
         <CheckCircle2 className="w-4 h-4 text-accent-theme shrink-0 mt-0.5" />
         <div className="leading-relaxed">
-          <strong className="text-primary font-semibold">Measured Result: </strong>
-          Fixed model recall crashes to <strong className="text-rose-500 font-bold">42.0%</strong> under micro-velocity attacks.
-          Online learning via verified feedback restores recall to <strong className="text-emerald-500 font-bold">99.2%+</strong> without increasing false alerts.
+          <strong className="text-primary font-semibold">Audited Concept-Drift Benchmark (N=4,800): </strong>
+          On the historical holdout (N=1,700), both models achieved 100% recall. Under the concept-drift stream (N=4,800), fixed model recall crashed to <strong className="text-rose-500 font-bold">42.02%</strong> (57.98% missed fraud).
+          Online learning via verified feedback recovered recall to <strong className="text-emerald-500 font-bold">99.17%</strong> (99.88% accuracy, 0.83% missed fraud) with zero target leakage.
         </div>
       </div>
     </div>
