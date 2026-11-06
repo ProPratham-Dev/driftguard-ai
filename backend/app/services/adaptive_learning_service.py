@@ -167,6 +167,8 @@ class AdaptiveLearningService:
         db_tx.feedback_received = True
         db_tx.feedback_label = ground_truth
         db_tx.feedback_timestamp = datetime.now(timezone.utc)
+        db.commit()
+        db.refresh(db_tx)
 
         # Check prediction error (comparing adaptive model prediction recorded at transaction time)
         prediction_correct = (db_tx.adaptive_prediction == ground_truth)

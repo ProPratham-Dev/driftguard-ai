@@ -49,7 +49,7 @@ def health_check():
 def get_system_status(db: Session = Depends(get_db)):
     """Fetch current system state, simulator status, and active model versions."""
     total_tx = db.query(DBTransaction).count()
-    total_feedback = db.query(DBTransaction).filter(DBTransaction.feedback_received == True).count()
+    total_feedback = db.query(DBTransaction).filter(DBTransaction.feedback_received == True, DBTransaction.feedback_label.in_([0, 1])).count()
     total_drift = db.query(DBDriftEvent).count()
     active_alerts = db.query(DBAlert).filter(DBAlert.is_resolved == False).count()
     
@@ -128,7 +128,7 @@ def get_drift_history(
     """
     txs = (
         db.query(DBTransaction)
-        .filter(DBTransaction.feedback_received == True)
+        .filter(DBTransaction.feedback_received == True, DBTransaction.feedback_label.in_([0, 1]))
         .order_by(DBTransaction.id.desc())
         .limit(limit)
         .all()
@@ -304,7 +304,7 @@ def get_model_comparison(
     """
     txs = (
         db.query(DBTransaction)
-        .filter(DBTransaction.feedback_received == True)
+        .filter(DBTransaction.feedback_received == True, DBTransaction.feedback_label.in_([0, 1]))
         .order_by(DBTransaction.id.desc())
         .limit(window)
         .all()

@@ -25,3 +25,5 @@ driftguard.db
 .vscode/
 .idea/
 
+# Temporary audit scripts
+/scratch/
