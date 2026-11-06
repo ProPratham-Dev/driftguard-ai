@@ -10,7 +10,7 @@ export function useDriftGuardSocket() {
     current_error_rate: 0.0,
     reference_error_rate: 0.0,
     recent_samples_count: 0,
-    status_message: 'Connecting to telemetry engine...'
+    status_message: 'Monitoring transaction stream...'
   });
   const [driftEvents, setDriftEvents] = useState([]);
   const [simulatorStatus, setSimulatorStatus] = useState({
@@ -35,15 +35,27 @@ export function useDriftGuardSocket() {
   const socketRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
 
-  // Fetch initial REST data
+  // Performance Optimization: Batch incoming transactions to avoid re-render churn
+  const txBufferRef = useRef([]);
+  const flushTimerRef = useRef(null);
+
+  const flushTransactionBuffer = useCallback(() => {
+    if (txBufferRef.current.length > 0) {
+      const incoming = [...txBufferRef.current];
+      txBufferRef.current = [];
+      setTransactions((prev) => [...incoming, ...prev].slice(0, 100));
+    }
+  }, []);
+
+  // Initial REST Sync
   const fetchInitialData = useCallback(async () => {
     try {
       const [simRes, driftRes, versionsRes, compRes, eventsRes] = await Promise.all([
-        fetch('/api/simulator/status').then(r => r.ok ? r.json() : null),
-        fetch('/api/drift/status').then(r => r.ok ? r.json() : null),
-        fetch('/api/models/versions').then(r => r.ok ? r.json() : []),
-        fetch('/api/metrics/comparison?window=200').then(r => r.ok ? r.json() : null),
-        fetch('/api/drift/events?limit=20').then(r => r.ok ? r.json() : [])
+        fetch('/api/simulator/status').then((r) => (r.ok ? r.json() : null)),
+        fetch('/api/drift/status').then((r) => (r.ok ? r.json() : null)),
+        fetch('/api/models/versions').then((r) => (r.ok ? r.json() : [])),
+        fetch('/api/metrics/comparison?window=200').then((r) => (r.ok ? r.json() : null)),
+        fetch('/api/drift/events?limit=20').then((r) => (r.ok ? r.json() : []))
       ]);
 
       if (simRes) setSimulatorStatus(simRes);
@@ -56,14 +68,15 @@ export function useDriftGuardSocket() {
     }
   }, []);
 
-  // Connect WebSocket
   useEffect(() => {
     fetchInitialData();
+
+    // Flush batch buffer every 120ms for smooth 60fps UI
+    flushTimerRef.current = setInterval(flushTransactionBuffer, 120);
 
     let isMounted = true;
 
     function connect() {
-      // Determine ws protocol and host
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${protocol}//${window.location.host}/ws/live`;
 
@@ -73,7 +86,6 @@ export function useDriftGuardSocket() {
       ws.onopen = () => {
         if (!isMounted) return;
         setIsConnected(true);
-        console.log('DriftGuard Telemetry WebSocket connected.');
       };
 
       ws.onmessage = (event) => {
@@ -86,14 +98,14 @@ export function useDriftGuardSocket() {
             if (data.simulator) setSimulatorStatus(data.simulator);
             if (data.drift) setDriftStatus(data.drift);
           } else if (eventType === 'new_transaction') {
-            // Prepend new transaction (capped at last 50 for smooth UI)
-            setTransactions((prev) => [data, ...prev.slice(0, 49)]);
+            // Buffer new transaction
+            txBufferRef.current.unshift(data);
             setSimulatorStatus((prev) => ({
               ...prev,
               transactions_generated: prev.transactions_generated + 1
             }));
           } else if (eventType === 'verified_feedback') {
-            // Update transaction feedback badge in the list
+            // Update matching transaction in table
             setTransactions((prev) =>
               prev.map((tx) =>
                 tx.tx_id === data.tx_id
@@ -129,21 +141,19 @@ export function useDriftGuardSocket() {
               ...prev.slice(0, 24)
             ]);
           } else if (eventType === 'model_update') {
-            // Refetch versions and metrics
-            fetch('/api/models/versions').then(r => r.ok && r.json()).then(v => v && setModelVersions(v));
-            fetch('/api/metrics/comparison?window=200').then(r => r.ok && r.json()).then(c => c && setComparisonMetrics(c));
+            fetch('/api/models/versions').then((r) => r.ok && r.json()).then((v) => v && setModelVersions(v));
+            fetch('/api/metrics/comparison?window=200').then((r) => r.ok && r.json()).then((c) => c && setComparisonMetrics(c));
           } else if (eventType === 'simulator_status') {
             setSimulatorStatus(data);
           }
         } catch (err) {
-          console.error('Error parsing WebSocket payload:', err);
+          console.error('WebSocket payload parsing error:', err);
         }
       };
 
       ws.onclose = () => {
         if (!isMounted) return;
         setIsConnected(false);
-        console.warn('DriftGuard WebSocket disconnected. Retrying in 2s...');
         reconnectTimeoutRef.current = setTimeout(connect, 2000);
       };
 
@@ -155,63 +165,62 @@ export function useDriftGuardSocket() {
 
     connect();
 
-    // Periodic polling backup for comparison metrics
+    // Periodic metrics comparison refresh
     const metricsInterval = setInterval(() => {
       fetch('/api/metrics/comparison?window=200')
-        .then(r => r.ok ? r.json() : null)
-        .then(comp => comp && setComparisonMetrics(comp))
+        .then((r) => (r.ok ? r.json() : null))
+        .then((comp) => comp && setComparisonMetrics(comp))
         .catch(() => {});
-    }, 4000);
+    }, 3500);
 
     return () => {
       isMounted = false;
       clearInterval(metricsInterval);
+      if (flushTimerRef.current) clearInterval(flushTimerRef.current);
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-      if (socketRef.current) {
-        socketRef.current.close();
-      }
+      if (socketRef.current) socketRef.current.close();
     };
-  }, [fetchInitialData]);
+  }, [fetchInitialData, flushTransactionBuffer]);
 
   // Actions
-  const startSimulator = async () => {
+  const startSimulator = useCallback(async () => {
     const res = await fetch('/api/simulator/start', { method: 'POST' });
     if (res.ok) setSimulatorStatus(await res.json());
-  };
+  }, []);
 
-  const pauseSimulator = async () => {
+  const pauseSimulator = useCallback(async () => {
     const res = await fetch('/api/simulator/pause', { method: 'POST' });
     if (res.ok) setSimulatorStatus(await res.json());
-  };
+  }, []);
 
-  const resumeSimulator = async () => {
+  const resumeSimulator = useCallback(async () => {
     const res = await fetch('/api/simulator/resume', { method: 'POST' });
     if (res.ok) setSimulatorStatus(await res.json());
-  };
+  }, []);
 
-  const stopSimulator = async () => {
+  const stopSimulator = useCallback(async () => {
     const res = await fetch('/api/simulator/stop', { method: 'POST' });
     if (res.ok) setSimulatorStatus(await res.json());
-  };
+  }, []);
 
-  const updateConfig = async (newConfig) => {
+  const updateConfig = useCallback(async (newConfig) => {
     const res = await fetch('/api/simulator/config', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newConfig)
     });
     if (res.ok) setSimulatorStatus(await res.json());
-  };
+  }, []);
 
-  const triggerRollback = async () => {
+  const triggerRollback = useCallback(async () => {
     const res = await fetch('/api/learning/rollback', { method: 'POST' });
     if (res.ok) {
       const data = await res.json();
-      fetch('/api/models/versions').then(r => r.ok && r.json()).then(v => v && setModelVersions(v));
+      fetch('/api/models/versions').then((r) => r.ok && r.json()).then((v) => v && setModelVersions(v));
       return data;
     }
     return { success: false, message: 'Rollback failed.' };
-  };
+  }, []);
 
   return {
     isConnected,

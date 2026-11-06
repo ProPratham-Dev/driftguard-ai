@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { History, RotateCcw, Check, AlertCircle, Shield } from 'lucide-react';
+import { History, RotateCcw } from 'lucide-react';
 
-export default function ModelLifecycle({ modelVersions, triggerRollback }) {
+function ModelLifecycleComponent({ modelVersions, triggerRollback }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [rollbackMsg, setRollbackMsg] = useState('');
   const [isRollingBack, setIsRollingBack] = useState(false);
@@ -20,12 +20,12 @@ export default function ModelLifecycle({ modelVersions, triggerRollback }) {
   };
 
   return (
-    <div className="bg-[#0b1428] border border-slate-800/80 rounded-xl p-5 shadow-xl">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-3">
+    <div id="audit" className="bg-card border border-theme rounded-xl p-5 theme-card-shadow">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-theme gap-3">
         <div className="flex items-center gap-2">
-          <History className="w-5 h-5 text-cyan-400" />
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-            Model Version Governance & Rollback History
+          <History className="w-4 h-4 text-accent-theme" />
+          <h3 className="text-xs font-bold text-primary uppercase tracking-wider">
+            Model Governance, Retraining Logs & Version Rollback
           </h3>
         </div>
 
@@ -34,23 +34,23 @@ export default function ModelLifecycle({ modelVersions, triggerRollback }) {
           {!showConfirm ? (
             <button
               onClick={() => setShowConfirm(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-mono text-cyan-300 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card-subtle hover:bg-card-subtle/80 border border-theme text-xs font-mono text-accent-theme transition-all cursor-pointer"
             >
-              <RotateCcw className="w-3.5 h-3.5" /> Rollback Adaptive Version
+              <RotateCcw className="w-3.5 h-3.5" /> Rollback Version
             </button>
           ) : (
-            <div className="flex items-center gap-2 bg-slate-900 border border-amber-600/60 p-1.5 rounded-lg">
-              <span className="text-[11px] text-amber-300">Confirm restore previous version?</span>
+            <div className="flex items-center gap-2 bg-card-subtle border border-amber-500/50 p-1.5 rounded-lg">
+              <span className="text-[11px] text-amber-500 font-medium">Confirm restore stable version?</span>
               <button
                 onClick={handleRollback}
                 disabled={isRollingBack}
                 className="px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold cursor-pointer"
               >
-                {isRollingBack ? 'Restoring...' : 'Yes, Rollback'}
+                {isRollingBack ? 'Restoring...' : 'Confirm Rollback'}
               </button>
               <button
                 onClick={() => setShowConfirm(false)}
-                className="px-2 py-1 rounded bg-slate-800 text-slate-300 text-xs cursor-pointer"
+                className="px-2 py-1 rounded bg-card text-secondary hover:text-primary text-xs cursor-pointer border border-theme"
               >
                 Cancel
               </button>
@@ -60,30 +60,30 @@ export default function ModelLifecycle({ modelVersions, triggerRollback }) {
       </div>
 
       {rollbackMsg && (
-        <div className="my-3 p-2.5 rounded bg-cyan-950/40 border border-cyan-800 text-xs text-cyan-300 font-mono">
+        <div className="my-3 p-2.5 rounded bg-sky-500/10 border border-sky-500/30 text-xs text-sky-600 dark:text-sky-300 font-mono">
           {rollbackMsg}
         </div>
       )}
 
-      {/* Model Versions Table */}
+      {/* Model Versions Audit Table */}
       <div className="overflow-x-auto mt-3">
         <table className="w-full text-left text-xs font-mono border-collapse">
           <thead>
-            <tr className="border-b border-slate-800 text-slate-400 text-[11px]">
+            <tr className="border-b border-theme text-secondary text-[11px]">
               <th className="py-2 px-3">Version Tag</th>
               <th className="py-2 px-3">Model Type</th>
               <th className="py-2 px-3">Status</th>
               <th className="py-2 px-3">Recall</th>
               <th className="py-2 px-3">F1-Score</th>
               <th className="py-2 px-3">Samples</th>
-              <th className="py-2 px-3 text-right">Timestamp</th>
+              <th className="py-2 px-3 text-right">Trained At</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/50">
+          <tbody className="divide-y divide-subtle-theme">
             {modelVersions?.length === 0 ? (
               <tr>
-                <td colSpan="7" className="py-6 text-center text-slate-500 italic">
-                  No version history records found.
+                <td colSpan="7" className="py-6 text-center text-secondary italic">
+                  No model version history found.
                 </td>
               </tr>
             ) : (
@@ -93,33 +93,33 @@ export default function ModelLifecycle({ modelVersions, triggerRollback }) {
                 const isRolledBack = v.status === 'rolled_back';
 
                 return (
-                  <tr key={v.id} className={isActive ? 'bg-cyan-950/15' : 'hover:bg-slate-900/40'}>
-                    <td className="py-2 px-3 font-bold text-white flex items-center gap-1.5">
-                      {isActive && <span className="w-2 h-2 rounded-full bg-cyan-400"></span>}
+                  <tr key={v.id} className={isActive ? 'bg-sky-500/5' : 'hover:bg-card-subtle/40'}>
+                    <td className="py-2 px-3 font-bold text-primary flex items-center gap-1.5">
+                      {isActive && <span className="w-1.5 h-1.5 rounded-full bg-accent-theme"></span>}
                       {v.version_tag}
                     </td>
-                    <td className="py-2 px-3 text-slate-300 capitalize">{v.model_name}</td>
+                    <td className="py-2 px-3 text-secondary capitalize">{v.model_name}</td>
                     <td className="py-2 px-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                         isActive
-                          ? 'bg-emerald-950 border border-emerald-700 text-emerald-300'
+                          ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
                           : isCandidate
-                          ? 'bg-blue-950 border border-blue-700 text-blue-300'
+                          ? 'bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400'
                           : isRolledBack
-                          ? 'bg-amber-950 border border-amber-700 text-amber-300'
-                          : 'bg-slate-900 text-slate-500'
+                          ? 'bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400'
+                          : 'bg-card-subtle text-muted-custom'
                       }`}>
                         {v.status.toUpperCase()}
                       </span>
                     </td>
-                    <td className="py-2 px-3 text-slate-200 font-bold">
+                    <td className="py-2 px-3 text-primary font-bold">
                       {v.recall ? `${(v.recall * 100).toFixed(1)}%` : 'N/A'}
                     </td>
-                    <td className="py-2 px-3 text-slate-200">
+                    <td className="py-2 px-3 text-primary">
                       {v.f1_score ? v.f1_score.toFixed(3) : 'N/A'}
                     </td>
-                    <td className="py-2 px-3 text-slate-400">{v.sample_count?.toLocaleString()}</td>
-                    <td className="py-2 px-3 text-right text-slate-500 text-[10px]">
+                    <td className="py-2 px-3 text-secondary">{v.sample_count?.toLocaleString()}</td>
+                    <td className="py-2 px-3 text-right text-muted-custom text-[10px]">
                       {v.trained_at ? new Date(v.trained_at).toLocaleString() : 'initial'}
                     </td>
                   </tr>
@@ -132,3 +132,5 @@ export default function ModelLifecycle({ modelVersions, triggerRollback }) {
     </div>
   );
 }
+
+export default React.memo(ModelLifecycleComponent);

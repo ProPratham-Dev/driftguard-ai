@@ -1,7 +1,7 @@
 import React from 'react';
-import { Play, Pause, Square, FastForward, ShieldAlert, Zap, Clock, RotateCcw } from 'lucide-react';
+import { Play, Pause, Square, FastForward, Zap, Clock } from 'lucide-react';
 
-export default function SimulatorControls({
+function SimulatorControlsComponent({
   simulatorStatus,
   startSimulator,
   pauseSimulator,
@@ -17,38 +17,40 @@ export default function SimulatorControls({
   const adaptiveEnabled = simulatorStatus?.adaptive_learning_enabled ?? true;
 
   return (
-    <div className="bg-[#0b1428] border border-slate-800/80 rounded-xl p-5 shadow-xl">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
+    <div id="simulator" className="bg-card border border-theme rounded-xl p-5 theme-card-shadow">
+      
+      {/* Title & Stream Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-theme gap-3">
         <div>
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Zap className="w-5 h-5 text-cyan-400" />
+          <h2 className="text-sm font-bold text-primary flex items-center gap-2 tracking-wide uppercase">
+            <Zap className="w-4 h-4 text-accent-theme" />
             Hackathon Demonstration Controls
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Demonstrate real-time concept drift detection and online model adaptation.
+          <p className="text-xs text-secondary mt-0.5">
+            Interactive controls demonstrating concept drift emergence and online adaptive defense.
           </p>
         </div>
 
-        {/* Engine State Controls */}
+        {/* Engine State Buttons */}
         <div className="flex items-center gap-2">
           {!isRunning ? (
             <button
               onClick={startSimulator}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-lg shadow-cyan-600/30 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
             >
               <Play className="w-3.5 h-3.5 fill-white" /> Start Stream
             </button>
           ) : isPaused ? (
             <button
               onClick={resumeSimulator}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
             >
               <Play className="w-3.5 h-3.5 fill-white" /> Resume
             </button>
           ) : (
             <button
               onClick={pauseSimulator}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
             >
               <Pause className="w-3.5 h-3.5 fill-white" /> Pause
             </button>
@@ -57,18 +59,18 @@ export default function SimulatorControls({
           {isRunning && (
             <button
               onClick={stopSimulator}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-rose-900/60 hover:bg-rose-800 border border-rose-700 text-rose-300 text-xs font-semibold transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-500 dark:text-rose-400 text-xs font-semibold transition-all cursor-pointer"
             >
-              <Square className="w-3.5 h-3.5 fill-rose-300" /> Stop
+              <Square className="w-3.5 h-3.5 fill-current" /> Stop
             </button>
           )}
         </div>
       </div>
 
-      {/* 3 Main Hackathon Demonstration Buttons */}
+      {/* 3 Core Hackathon Demo Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 my-4">
         
-        {/* Control 1: Normal Traffic */}
+        {/* Step 1: Normal Traffic */}
         <button
           onClick={() => {
             updateConfig({ fraud_regime: 'normal' });
@@ -76,20 +78,26 @@ export default function SimulatorControls({
           }}
           className={`flex flex-col p-3 rounded-lg border text-left transition-all cursor-pointer ${
             regime === 'normal'
-              ? 'bg-emerald-950/40 border-emerald-500/80 shadow-lg shadow-emerald-950/50'
-              : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+              ? 'bg-emerald-500/10 border-emerald-500/50 shadow-xs'
+              : 'bg-card-subtle/50 border-theme hover:border-emerald-500/30'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white uppercase tracking-wider">1. Start Normal Traffic</span>
-            <span className={`w-2.5 h-2.5 rounded-full ${regime === 'normal' ? 'bg-emerald-400 animate-pulse' : 'bg-slate-700'}`}></span>
+            <span className="text-xs font-bold text-primary uppercase tracking-wider">
+              1. Normal Traffic
+            </span>
+            <span
+              className={`w-2.5 h-2.5 rounded-full ${
+                regime === 'normal' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400 dark:bg-slate-700'
+              }`}
+            />
           </div>
-          <p className="text-[11px] text-slate-400 mt-1.5 leading-snug">
-            Emits regular card transactions. Baseline models perform with near-zero error.
+          <p className="text-[11px] text-secondary mt-1.5 leading-snug">
+            Emits benign card transactions. Both static and adaptive models operate with near-zero error.
           </p>
         </button>
 
-        {/* Control 2: Introduce New Fraud Pattern */}
+        {/* Step 2: Introduce New Fraud Pattern */}
         <button
           onClick={() => {
             updateConfig({ fraud_regime: 'drift_evasion' });
@@ -97,53 +105,65 @@ export default function SimulatorControls({
           }}
           className={`flex flex-col p-3 rounded-lg border text-left transition-all cursor-pointer ${
             regime === 'drift_evasion'
-              ? 'bg-cyan-950/50 border-cyan-400 shadow-lg shadow-cyan-950/50'
-              : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+              ? 'bg-sky-500/10 border-sky-500/50 shadow-xs'
+              : 'bg-card-subtle/50 border-theme hover:border-sky-500/30'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider">2. Introduce New Fraud Pattern</span>
-            <span className={`w-2.5 h-2.5 rounded-full ${regime === 'drift_evasion' ? 'bg-cyan-400 animate-pulse' : 'bg-slate-700'}`}></span>
+            <span className="text-xs font-bold text-accent-theme uppercase tracking-wider">
+              2. Introduce New Fraud Pattern
+            </span>
+            <span
+              className={`w-2.5 h-2.5 rounded-full ${
+                regime === 'drift_evasion' ? 'bg-sky-400 animate-pulse' : 'bg-slate-400 dark:bg-slate-700'
+              }`}
+            />
           </div>
-          <p className="text-[11px] text-slate-400 mt-1.5 leading-snug">
-            Switches to nocturnal micro-velocity card testing. Fixed model recall crashes; concept drift is triggered.
+          <p className="text-[11px] text-secondary mt-1.5 leading-snug">
+            Switches to nocturnal micro-velocity evasion. Fixed model recall crashes; ASW-DD triggers CRITICAL drift.
           </p>
         </button>
 
-        {/* Control 3: Enable Adaptive Learning */}
+        {/* Step 3: Enable Adaptive Learning */}
         <button
           onClick={() => updateConfig({ adaptive_learning_enabled: !adaptiveEnabled })}
           className={`flex flex-col p-3 rounded-lg border text-left transition-all cursor-pointer ${
             adaptiveEnabled
-              ? 'bg-blue-950/40 border-blue-500/80 shadow-lg shadow-blue-950/50'
-              : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 opacity-70'
+              ? 'bg-blue-500/10 border-blue-500/50 shadow-xs'
+              : 'bg-card-subtle/50 border-theme opacity-70'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-blue-300 uppercase tracking-wider">3. Adaptive Learning</span>
-            <span className={`px-2 py-0.5 text-[10px] rounded font-mono font-bold ${
-              adaptiveEnabled ? 'bg-blue-900 text-blue-200' : 'bg-slate-800 text-slate-400'
-            }`}>
-              {adaptiveEnabled ? 'ENABLED' : 'DISABLED'}
+            <span className="text-xs font-bold text-primary uppercase tracking-wider">
+              3. Adaptive Online Learning
+            </span>
+            <span
+              className={`px-2 py-0.5 text-[10px] rounded font-mono font-bold ${
+                adaptiveEnabled
+                  ? 'bg-blue-500/20 text-accent-theme'
+                  : 'bg-card-subtle text-muted-custom'
+              }`}
+            >
+              {adaptiveEnabled ? 'ACTIVE' : 'OFF'}
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1.5 leading-snug">
-            Learns incrementally from verified feedback (`partial_fit`) to recover fraud capture rate.
+          <p className="text-[11px] text-secondary mt-1.5 leading-snug">
+            Trains candidate models on delayed verified feedback and auto-promotes to restore fraud recall.
           </p>
         </button>
 
       </div>
 
       {/* Sliders: Rate & Feedback Delay */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-3 border-t border-slate-800/80 text-xs">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-3 border-t border-theme text-xs">
         
         {/* Stream Speed Slider */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between font-mono">
-            <span className="text-slate-400 flex items-center gap-1.5">
-              <FastForward className="w-3.5 h-3.5 text-cyan-400" /> Transaction Rate:
+            <span className="text-secondary flex items-center gap-1.5">
+              <FastForward className="w-3.5 h-3.5 text-accent-theme" /> Speed Interval:
             </span>
-            <span className="text-cyan-300 font-bold">{intervalMs} ms ({Math.round(1000 / intervalMs)} tx/sec)</span>
+            <span className="text-primary font-bold">{intervalMs} ms ({Math.round(1000 / intervalMs)} tx/sec)</span>
           </div>
           <input
             type="range"
@@ -152,17 +172,17 @@ export default function SimulatorControls({
             step="100"
             value={intervalMs}
             onChange={(e) => updateConfig({ interval_ms: parseInt(e.target.value) })}
-            className="w-full accent-cyan-400 cursor-pointer"
+            className="w-full accent-sky-500 cursor-pointer"
           />
         </div>
 
         {/* Feedback Delay Slider */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between font-mono">
-            <span className="text-slate-400 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-blue-400" /> Verified Feedback Delay:
+            <span className="text-secondary flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-accent-theme" /> Feedback Arrival Delay:
             </span>
-            <span className="text-blue-300 font-bold">{(feedbackDelayMs / 1000).toFixed(1)}s</span>
+            <span className="text-primary font-bold">{(feedbackDelayMs / 1000).toFixed(1)}s</span>
           </div>
           <input
             type="range"
@@ -171,11 +191,14 @@ export default function SimulatorControls({
             step="500"
             value={feedbackDelayMs}
             onChange={(e) => updateConfig({ feedback_delay_ms: parseInt(e.target.value) })}
-            className="w-full accent-blue-400 cursor-pointer"
+            className="w-full accent-sky-500 cursor-pointer"
           />
         </div>
 
       </div>
+
     </div>
   );
 }
+
+export default React.memo(SimulatorControlsComponent);
