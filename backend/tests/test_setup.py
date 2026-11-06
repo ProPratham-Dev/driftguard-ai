@@ -10,14 +10,6 @@ from backend.app.models.db_models import (
 )
 from backend.app.main import app
 
-@pytest.fixture(scope="module", autouse=True)
-def setup_test_db():
-    # Initialize DB schema
-    Base.metadata.create_all(bind=engine)
-    yield
-    # Teardown
-    Base.metadata.drop_all(bind=engine)
-
 def test_settings_configuration():
     """Verify application configuration loads cleanly with proper types."""
     assert settings.APP_NAME == "DriftGuard AI"
@@ -122,8 +114,19 @@ def test_duplicate_transaction_prevention():
     """Ensure duplicate transaction IDs violate unique constraint."""
     db = SessionLocal()
     try:
+        first_tx = DBTransaction(
+            tx_id="TX_DUP_001",
+            amount=50.0,
+            merchant_category="retail",
+            distance_from_home=10.0,
+            device_trust_score=0.9,
+            is_fraud_ground_truth=0
+        )
+        db.add(first_tx)
+        db.commit()
+
         dup_tx = DBTransaction(
-            tx_id="TX_TEST_001",  # Same tx_id as previous
+            tx_id="TX_DUP_001",  # Duplicate ID
             amount=99.99,
             merchant_category="crypto",
             distance_from_home=500.0,

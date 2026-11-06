@@ -92,6 +92,50 @@ class AlertResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class ModelVersionResponse(BaseModel):
+    id: int
+    model_name: str
+    version_tag: str
+    trained_at: datetime
+    sample_count: int
+    accuracy: float
+    precision: float
+    recall: float
+    f1_score: float
+    fpr: float
+    fnr: float
+    status: str
+    description: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+class DriftStatusResponse(BaseModel):
+    drift_detected: bool
+    severity: str  # NORMAL, WARNING, CRITICAL
+    drift_score: float
+    current_error_rate: float
+    reference_error_rate: float
+    recent_samples_count: int
+    reference_samples_count: int
+    p_value: float
+    detection_timestamp: datetime
+    status_message: str
+
+class FeedbackResponse(BaseModel):
+    tx_id: str
+    feedback_recorded: bool
+    prediction: int
+    ground_truth: int
+    prediction_correct: bool
+    drift_status: DriftStatusResponse
+    learning_action_triggered: str
+
+class RollbackResponse(BaseModel):
+    success: bool
+    message: str
+    active_version: str
+    previous_version: Optional[str] = None
+
 class SystemStatusResponse(BaseModel):
     app_name: str
     status: str
